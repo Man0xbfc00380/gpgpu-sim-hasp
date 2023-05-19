@@ -54,6 +54,7 @@
 #include "stack.h"
 #include "stats.h"
 #include "traffic_breakdown.h"
+#include "hasp_trigger.h"
 
 #define NO_OP_FLAG 0xFF
 
@@ -1520,6 +1521,8 @@ class shader_core_config : public core_config {
   mutable cache_config m_L1T_config;
   mutable cache_config m_L1C_config;
   mutable l1d_cache_config m_L1D_config;
+
+  mutable hasp_trigger m_hasp_trigger;
 
   bool gpgpu_dwf_reg_bankconflict;
 

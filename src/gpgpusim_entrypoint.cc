@@ -75,6 +75,7 @@ static void termination_callback() {
 
 void *gpgpu_sim_thread_concurrent(void *ctx_ptr) {
   printf("GPGPU-Sim: *** gpgpu_sim_thread_concurrent *** \n");
+  printf("GPGPU-Sim: *** [g_debug_execution]: %d  *** \n", g_debug_execution);
   gpgpu_context *ctx = (gpgpu_context *)ctx_ptr;
   atexit(termination_callback);
   // concurrent kernel execution simulation thread
@@ -146,7 +147,7 @@ void *gpgpu_sim_thread_concurrent(void *ctx_ptr) {
       fflush(stdout);
     }
     if (sim_cycles) {
-      ctx->the_gpgpusim->g_the_gpu->print_stats();
+      // ctx->the_gpgpusim->g_the_gpu->print_stats();
       ctx->the_gpgpusim->g_the_gpu->update_stats();
       ctx->print_simulation_time();
     }

@@ -809,6 +809,7 @@ void gpgpu_sim::stop_all_running_kernels() {
 }
 
 void exec_gpgpu_sim::createSIMTCluster() {
+  printf("[SIMT Cluster Number]: %d\n", m_shader_config->n_simt_clusters);
   m_cluster = new simt_core_cluster *[m_shader_config->n_simt_clusters];
   for (unsigned i = 0; i < m_shader_config->n_simt_clusters; i++)
     m_cluster[i] =

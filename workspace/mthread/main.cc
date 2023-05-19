@@ -9,8 +9,7 @@
 
 pthread_t thread[4];
 
-void* thread0 ( void* )
-{
+void* thread0 ( void* ) {
     // do GPU task
     float  time, start;
     start  =  clock();
@@ -37,8 +36,7 @@ void* thread0 ( void* )
     pthread_exit(NULL);
 }
 
-void* thread1 ( void* )
-{
+void* thread1 ( void* ) {
     // do GPU task
     float  time, start;
     start  =  clock();
@@ -65,8 +63,7 @@ void* thread1 ( void* )
     pthread_exit(NULL);
 }
 
-void  thread_create()
-{
+void  thread_create() {
     int  temp;
     memset( & thread,  0 ,  sizeof (thread));
     if ((temp  =  pthread_create( & thread[ 0 ], NULL, thread0, NULL))  !=   0 )
@@ -80,8 +77,7 @@ void  thread_create()
         printf( " Thread 1 Created!\n " );
 }
 
-void  thread_wait()
-{
+void  thread_wait() {
     if (thread[ 0 ]  !=   0 )
     {
         pthread_join(thread[ 0 ], NULL);
@@ -94,9 +90,7 @@ void  thread_wait()
     }
 }
 
-
-int  main()
-{
+int  main() {
     float  time, start;
     printf( " Creating Thread \n " );
     start  =  clock();
