@@ -44,6 +44,7 @@ static int sg_argc = 3;
 static const char *sg_argv[] = {"", "-config", "gpgpusim.config"};
 
 void *gpgpu_sim_thread_sequential(void *ctx_ptr) {
+  printf("GPGPU-Sim: *** gpgpu_sim_thread_sequential *** \n");
   gpgpu_context *ctx = (gpgpu_context *)ctx_ptr;
   // at most one kernel running at a time
   bool done;
@@ -73,6 +74,7 @@ static void termination_callback() {
 }
 
 void *gpgpu_sim_thread_concurrent(void *ctx_ptr) {
+  printf("GPGPU-Sim: *** gpgpu_sim_thread_concurrent *** \n");
   gpgpu_context *ctx = (gpgpu_context *)ctx_ptr;
   atexit(termination_callback);
   // concurrent kernel execution simulation thread
