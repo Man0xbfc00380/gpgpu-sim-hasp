@@ -11,5 +11,5 @@ cleanall:
 	rm _cuobjdump_*
 
 cleanrt:
-	rm _cuobjdump_* *.txt
+	rm _cuobjdump_*
 	rm *.ptx *.ptxas _app_cuda_version*

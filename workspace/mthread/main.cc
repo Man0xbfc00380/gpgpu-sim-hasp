@@ -42,18 +42,22 @@ void* thread1 ( void* ) {
     start  =  clock();
     printf( " Thread 1 start\n " );
     int  i, n  =   100 ;
-    float* a,  * b,  * c;
+    float* a,  * b,  * c, * d;
     a  =  ( float* )malloc(n  *   sizeof ( float ));
     b  =  ( float* )malloc(n  *   sizeof ( float ));
     c  =  ( float* )malloc(n  *   sizeof ( float ));
+    d  =  ( float* )malloc(n  *   sizeof ( float ));
     for (i  =   0 ; i < n; i ++ )
     {
-        a[i]  =   1.6f ;
+        a[i]  =   3.6f + (float)i;
         b[i]  =   2.0f ;
     }
 
-    for (i = 0 ; i < REPEAT_TIME ; i++ ) vectorMul(a, b, c, n);
-    for (i = 0 ; i < n; i ++ ) printf( " Thread 1 :c[%d] = %f\n " ,  i , c[i]);
+    for (i = 0 ; i < REPEAT_TIME ; i++ ) {
+        vectorSub(a, b, c, n);
+        vectorMul(c, b, d, n);
+    }
+    for (i = 0 ; i < n; i ++ ) printf( " Thread 1 :c[%d] = %f\n " ,  i , d[i]);
     
     free(a);
     free(b);
@@ -66,6 +70,7 @@ void* thread1 ( void* ) {
 void  thread_create() {
     int  temp;
     memset( & thread,  0 ,  sizeof (thread));
+    
     if ((temp  =  pthread_create( & thread[ 0 ], NULL, thread0, NULL))  !=   0 )
         printf( " Thread 0 Created Failed!\n " );
     else
