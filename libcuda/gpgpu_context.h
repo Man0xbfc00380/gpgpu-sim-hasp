@@ -79,5 +79,5 @@ class gpgpu_context {
   unsigned translate_pc_to_ptxlineno(unsigned pc);
 };
 gpgpu_context *GPGPU_Context();
-void haspFunctionRegister(const void* func_ptr, char* func_name);
+void haspFunctionRegister(const void* func_ptr, char* func_name, CUctx_st *context);
 #endif /* __gpgpu_context_h__ */

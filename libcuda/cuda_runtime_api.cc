@@ -756,9 +756,13 @@ void **cudaRegisterFatBinaryInternal(void *fatCubin,
 }
 
 // Hongyi (2023): Additional Function Call for HASP Exetension
-void haspFunctionRegister(const void* func_ptr, char* func_name) {
+void haspFunctionRegister(const void* func_ptr, char* func_name, CUctx_st *context) {
   printf("[haspFunctionRegister] %p-%s\n", func_ptr, func_name); 
-
+  // Modify HASP Trigger Cconfiguaration
+  _cuda_device_id *dev = context->get_device();
+  const struct cudaDeviceProp *prop = dev->get_prop();
+  const gpgpu_sim_config &config = dev->get_gpgpu()->get_config();
+  int add_token = config.add_hasp_trigger_item(func_ptr, func_name);
 }
 
 void cudaRegisterFunctionInternal(void **fatCubinHandle, const char *hostFun,
@@ -783,7 +787,7 @@ void cudaRegisterFunctionInternal(void **fatCubinHandle, const char *hostFun,
       "GPGPU-Sim PTX: __cudaRegisterFunction %s : hostFun 0x%p, "
       "fat_cubin_handle = %u\n",
       deviceFun, hostFun, fat_cubin_handle);
-  haspFunctionRegister((const void*)hostFun, deviceFun);
+  haspFunctionRegister((const void*)hostFun, deviceFun, context);
   if (context->get_device()->get_gpgpu()->get_config().use_cuobjdump())
     ctx->cuobjdumpParseBinary(fat_cubin_handle);
   context->register_function(fat_cubin_handle, hostFun, deviceFun);

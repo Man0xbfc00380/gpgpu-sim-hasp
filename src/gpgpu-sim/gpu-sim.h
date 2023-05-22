@@ -39,6 +39,7 @@
 #include "addrdec.h"
 #include "gpu-cache.h"
 #include "shader.h"
+#include "hasp_trigger.h"
 
 // constants for statistics printouts
 #define GPU_RSTAT_SHD_INFO 0x1
@@ -324,7 +325,7 @@ class gpgpu_sim_config : public power_config,
                          public gpgpu_functional_sim_config {
  public:
   gpgpu_sim_config(gpgpu_context *ctx)
-      : m_shader_config(ctx), m_memory_config(ctx) {
+      : m_shader_config(ctx), m_memory_config(ctx), m_hasp_trigger(ctx) {
     m_valid = false;
     gpgpu_ctx = ctx;
   }
@@ -371,6 +372,9 @@ class gpgpu_sim_config : public power_config,
   }
 
   bool flush_l1() const { return gpgpu_flush_l1_cache; }
+  int add_hasp_trigger_item(const void* func_ptr, char* func_name) const {
+    return m_hasp_trigger.add_hasp_item(func_ptr, func_name);
+  }
 
  private:
   void init_clock_domains(void);
@@ -380,6 +384,9 @@ class gpgpu_sim_config : public power_config,
   bool m_valid;
   shader_core_config m_shader_config;
   memory_config m_memory_config;
+  // Hongyi(2023): Added for HASP support
+  hasp_trigger m_hasp_trigger;
+
   // clock domains - frequency
   double core_freq;
   double icnt_freq;
