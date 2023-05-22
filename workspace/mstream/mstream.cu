@@ -2,18 +2,13 @@
 #include <cuda_runtime.h>
 
 __global__  void  haspSet_vectorAddKernel_th0_sh10_mem8(){}
-
 __global__  void  haspSet_vectorMulKernel_th1_sh10_mem8(){}
-
 __global__  void  vectorAddKernel(int* a,  int* b,  int* c,  int N) {
-    int  tid;
-    tid  =  threadIdx.x;
+    int tid = threadIdx.x + blockIdx.x * blockDim.x;
     if (tid < N) c[tid] = a[tid] + b[tid];
 }
-
 __global__  void  vectorMulKernel(int* a,  int* b,  int* c,  int N) {
-    int  tid;
-    tid  =  threadIdx.x;
+    int tid = threadIdx.x + blockIdx.x * blockDim.x;
     if (tid < N) c[tid] = a[tid] * b[tid];
 }
 
@@ -41,15 +36,15 @@ int main()
     cudaMemcpy(d_a, h_a, N * sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_b, h_b, N * sizeof(int), cudaMemcpyHostToDevice);
     
-    int threadsPerBlock = 32;
+    int threadsPerBlock = 128;
     int blocksPerGrid = (N + threadsPerBlock - 1) / threadsPerBlock;
-
+    printf("[Grid: %d, Block: %d]\n", blocksPerGrid, threadsPerBlock);
     cudaStream_t stream1, stream2;
     cudaStreamCreate(&stream1);
     cudaStreamCreate(&stream2);
 
-    haspSet_vectorAddKernel_th0_sh10_mem8<<<blocksPerGrid, threadsPerBlock, 0, stream1>>> ();
-    haspSet_vectorMulKernel_th1_sh10_mem8<<<blocksPerGrid, threadsPerBlock, 0, stream2>>> ();
+    haspSet_vectorAddKernel_th0_sh10_mem8<<<1, 1, 0, stream1>>> ();
+    haspSet_vectorMulKernel_th1_sh10_mem8<<<1, 1, 0, stream2>>> ();
 
     vectorAddKernel<<<blocksPerGrid, threadsPerBlock, 0, stream1>>>(d_a, d_b, d_c, N);
     cudaMemcpyAsync(h_c, d_c, N * sizeof(int), cudaMemcpyDeviceToHost, stream1);
@@ -63,7 +58,16 @@ int main()
     cudaStreamDestroy(stream1);
     cudaStreamDestroy(stream2);
 
-    for (int i = 0; i < 10; i++) {
+    cudaFree(d_a);
+    cudaFree(d_b);
+    cudaFree(d_c);
+    cudaFree(d_d);
+
+    for (int i = 0; i < 5; i++) {
+        printf("id: %d, (i+1) + 2 = %d, (i+1) * 2 = %d\n", i, h_c[i], h_d[i]);
+    }
+    printf("... ...\n");
+    for (int i = 995; i < 1000; i++) {
         printf("id: %d, (i+1) + 2 = %d, (i+1) * 2 = %d\n", i, h_c[i], h_d[i]);
     }
 
@@ -71,11 +75,6 @@ int main()
     delete[] h_b;
     delete[] h_c;
     delete[] h_d;
-    
-    cudaFree(d_a);
-    cudaFree(d_b);
-    cudaFree(d_c);
-    cudaFree(d_d);
 
     return 0;
 }
