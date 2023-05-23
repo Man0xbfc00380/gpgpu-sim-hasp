@@ -110,6 +110,7 @@
 #include <time.h>
 #include <fstream>
 #include <iostream>
+#include <string.h>
 #include <regex>
 #include <sstream>
 #include <string>

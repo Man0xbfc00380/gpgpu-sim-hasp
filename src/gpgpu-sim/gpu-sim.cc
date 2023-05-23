@@ -809,7 +809,6 @@ void gpgpu_sim::stop_all_running_kernels() {
 }
 
 void exec_gpgpu_sim::createSIMTCluster() {
-  printf("[SIMT Cluster Number]: %d\n", m_shader_config->n_simt_clusters);
   m_cluster = new simt_core_cluster *[m_shader_config->n_simt_clusters];
   for (unsigned i = 0; i < m_shader_config->n_simt_clusters; i++)
     m_cluster[i] =
@@ -838,7 +837,6 @@ gpgpu_sim::gpgpu_sim(const gpgpu_sim_config &config, gpgpu_context *ctx)
   m_power_stats =
       new power_stat_t(m_shader_config, average_pipeline_duty_cycle, active_sms,
                        m_shader_stats, m_memory_config, m_memory_stats);
-
   gpu_sim_insn = 0;
   gpu_tot_sim_insn = 0;
   gpu_tot_issued_cta = 0;
@@ -875,6 +873,9 @@ gpgpu_sim::gpgpu_sim(const gpgpu_sim_config &config, gpgpu_context *ctx)
 
   icnt_wrapper_init();
   icnt_create(m_shader_config->n_simt_clusters,
+              m_memory_config->m_n_mem_sub_partition);
+  // HASP Support (2023)
+  m_config.m_hasp_trigger.init(m_shader_config->n_simt_clusters * m_shader_config->n_simt_cores_per_cluster,
               m_memory_config->m_n_mem_sub_partition);
 
   time_vector_create(NUM_MEM_REQ_STAT);

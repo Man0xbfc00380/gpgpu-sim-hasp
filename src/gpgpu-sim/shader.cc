@@ -4209,7 +4209,10 @@ unsigned simt_core_cluster::issue_block2core() {
         // wait till current kernel finishes
         if (m_core[core]->get_not_completed() == 0) {
           kernel_info_t *k = m_gpu->select_kernel();
-          if (k) m_core[core]->set_kernel(k);
+          if (k) {
+            get_gpu()->get_config().clear_hasp_stream(k->name().c_str());
+            m_core[core]->set_kernel(k);
+          }
           kernel = k;
         }
       }

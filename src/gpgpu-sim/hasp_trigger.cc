@@ -61,6 +61,16 @@ int hasp_trigger::add_hasp_item(const void* func_ptr, char* func_name) const
 
     // Parse Function Name
     std::string prefix = "haspSet_";
+    std::string unprefix = "haspUnset_th";
+    int unprefix_idx = new_func_name.find(unprefix);
+    if (unprefix_idx >= 0) {
+        new_item.func_name = new_func_name;
+        new_item.cfg_state = 2;
+        new_item.thread_id = parseNum(new_func_name, unprefix);
+        hasp_func_table.push_back(new_item);
+        return 0;
+    }
+
     int prefix_idx = new_func_name.find(prefix);
     if (prefix_idx < 0) {
         // Original Function
@@ -107,8 +117,29 @@ int hasp_trigger::add_hasp_item(const void* func_ptr, char* func_name) const
         }
     }
     if (!find_target_func) hasp_func_table.push_back(new_item);
-    // print_table();
+    print_table();
     return 0;
+}
+
+std::vector<int> hasp_trigger::register_shader_table(int stream_id, int kernel_id) const {
+    std::vector<int> registered_shader_id;
+    // TODO: Many Things to Do.
+    return registered_shader_id;
+}
+
+void hasp_trigger::clear_shader_table(const char * c_func_name) const {
+    // Stream Validation
+    std::string func_name = c_func_name;
+    for (auto &item : hasp_func_table) {
+        if (item.func_name.compare(func_name) == 0) {
+            std::string prefix  = "haspUnset_th";
+            int prefix_idx = item.func_name.find(prefix);
+            if (prefix_idx >= 0) {
+                printf("[release] %s: Stream %d\n", func_name.c_str(), item.thread_id);
+                // TODO: Update Runtime Table.
+            }
+        }
+    }
 }
 
 hasp_trigger::~hasp_trigger(){}

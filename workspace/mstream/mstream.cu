@@ -3,6 +3,9 @@
 
 __global__  void  haspSet_vectorAddKernel_th1_sh5_mem4(){}
 __global__  void  haspSet_vectorMulKernel_th2_sh25_mem20(){}
+__global__  void  haspUnset_th1(){}
+__global__  void  haspUnset_th2(){}
+
 __global__  void  vectorAddKernel(int* a,  int* b,  int* c,  int N) {
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
     if (tid < N) c[tid] = a[tid] + b[tid];
@@ -14,9 +17,9 @@ __global__  void  vectorMulKernel(int* a,  int* b,  int* c,  int N) {
 
 int main()
 {
-    int N  = 500000;
-    int N1 = 100000;
-    int N2 = 500000;
+    int N  = 50000;
+    int N1 = 10000;
+    int N2 = 50000;
 
     int* h_a = new int[N];
     int* h_b = new int[N];
@@ -39,8 +42,9 @@ int main()
     cudaMemcpy(d_b, h_b, N * sizeof(int), cudaMemcpyHostToDevice);
     
     int threadsPerBlock = 64;
-    int blocksPerGrid = (N + threadsPerBlock - 1) / threadsPerBlock;
-    printf("[Grid: %d, Block: %d]\n", blocksPerGrid, threadsPerBlock);
+    int blocksPerGrid1 = (N1 + threadsPerBlock - 1) / threadsPerBlock;
+    int blocksPerGrid2 = (N2 + threadsPerBlock - 1) / threadsPerBlock;
+
     cudaStream_t stream1, stream2;
     cudaStreamCreate(&stream1);
     cudaStreamCreate(&stream2);
@@ -48,11 +52,14 @@ int main()
     haspSet_vectorAddKernel_th1_sh5_mem4<<<1, 1, 0, stream1>>> ();
     haspSet_vectorMulKernel_th2_sh25_mem20<<<1, 1, 0, stream2>>> ();
 
-    vectorAddKernel<<<blocksPerGrid, threadsPerBlock, 0, stream1>>>(d_a, d_b, d_c, N1);
+    vectorAddKernel<<<blocksPerGrid1, threadsPerBlock, 0, stream1>>>(d_a, d_b, d_c, N1);
     cudaMemcpyAsync(h_c, d_c, N * sizeof(int), cudaMemcpyDeviceToHost, stream1);
+    haspUnset_th1<<<1, 1, 0, stream1>>> ();
 
-    vectorMulKernel<<<blocksPerGrid, threadsPerBlock, 0, stream2>>>(d_a, d_b, d_d, N2);
+    vectorMulKernel<<<blocksPerGrid2, threadsPerBlock, 0, stream2>>>(d_a, d_b, d_a, N2);
+    vectorMulKernel<<<blocksPerGrid2, threadsPerBlock, 0, stream2>>>(d_a, d_b, d_d, N2);
     cudaMemcpyAsync(h_d, d_d, N * sizeof(int), cudaMemcpyDeviceToHost, stream2);
+    haspUnset_th2<<<1, 1, 0, stream2>>> ();
 
     cudaStreamSynchronize(stream1);
     cudaStreamSynchronize(stream2);

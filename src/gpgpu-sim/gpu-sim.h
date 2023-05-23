@@ -33,6 +33,7 @@
 #include <fstream>
 #include <iostream>
 #include <list>
+#include <string>
 #include "../abstract_hardware_model.h"
 #include "../option_parser.h"
 #include "../trace.h"
@@ -379,6 +380,10 @@ class gpgpu_sim_config : public power_config,
   // HASP Extension
   int add_hasp_trigger_item(const void* func_ptr, char* func_name) const {
     return m_hasp_trigger.add_hasp_item(func_ptr, func_name);
+  }
+
+  void clear_hasp_stream(const char* func_name) const {
+    m_hasp_trigger.clear_shader_table(func_name);
   }
 
  private:
