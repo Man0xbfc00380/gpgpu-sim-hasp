@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <cuda_runtime.h>
 
-__global__  void  haspSet_vectorAddKernel_th0_sh10_mem8(){}
-__global__  void  haspSet_vectorMulKernel_th1_sh10_mem8(){}
+__global__  void  haspSet_vectorAddKernel_th1_sh5_mem4(){}
+__global__  void  haspSet_vectorMulKernel_th2_sh25_mem20(){}
 __global__  void  vectorAddKernel(int* a,  int* b,  int* c,  int N) {
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
     if (tid < N) c[tid] = a[tid] + b[tid];
@@ -14,7 +14,9 @@ __global__  void  vectorMulKernel(int* a,  int* b,  int* c,  int N) {
 
 int main()
 {
-    int N = 1000;
+    int N  = 500000;
+    int N1 = 100000;
+    int N2 = 500000;
 
     int* h_a = new int[N];
     int* h_b = new int[N];
@@ -36,20 +38,20 @@ int main()
     cudaMemcpy(d_a, h_a, N * sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_b, h_b, N * sizeof(int), cudaMemcpyHostToDevice);
     
-    int threadsPerBlock = 128;
+    int threadsPerBlock = 64;
     int blocksPerGrid = (N + threadsPerBlock - 1) / threadsPerBlock;
     printf("[Grid: %d, Block: %d]\n", blocksPerGrid, threadsPerBlock);
     cudaStream_t stream1, stream2;
     cudaStreamCreate(&stream1);
     cudaStreamCreate(&stream2);
 
-    haspSet_vectorAddKernel_th0_sh10_mem8<<<1, 1, 0, stream1>>> ();
-    haspSet_vectorMulKernel_th1_sh10_mem8<<<1, 1, 0, stream2>>> ();
+    haspSet_vectorAddKernel_th1_sh5_mem4<<<1, 1, 0, stream1>>> ();
+    haspSet_vectorMulKernel_th2_sh25_mem20<<<1, 1, 0, stream2>>> ();
 
-    vectorAddKernel<<<blocksPerGrid, threadsPerBlock, 0, stream1>>>(d_a, d_b, d_c, N);
+    vectorAddKernel<<<blocksPerGrid, threadsPerBlock, 0, stream1>>>(d_a, d_b, d_c, N1);
     cudaMemcpyAsync(h_c, d_c, N * sizeof(int), cudaMemcpyDeviceToHost, stream1);
 
-    vectorMulKernel<<<blocksPerGrid, threadsPerBlock, 0, stream2>>>(d_a, d_b, d_d, N);
+    vectorMulKernel<<<blocksPerGrid, threadsPerBlock, 0, stream2>>>(d_a, d_b, d_d, N2);
     cudaMemcpyAsync(h_d, d_d, N * sizeof(int), cudaMemcpyDeviceToHost, stream2);
 
     cudaStreamSynchronize(stream1);

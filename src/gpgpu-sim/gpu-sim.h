@@ -63,6 +63,9 @@
 #define SAMPLELOG 222
 #define DUMPLOG 333
 
+// HASP Extension Enable (1: Enable, 0: Disable)
+#define HASP 1
+
 class gpgpu_context;
 
 extern tr1_hash_map<new_addr_type, unsigned> address_random_interleaving;
@@ -372,6 +375,8 @@ class gpgpu_sim_config : public power_config,
   }
 
   bool flush_l1() const { return gpgpu_flush_l1_cache; }
+  
+  // HASP Extension
   int add_hasp_trigger_item(const void* func_ptr, char* func_name) const {
     return m_hasp_trigger.add_hasp_item(func_ptr, func_name);
   }

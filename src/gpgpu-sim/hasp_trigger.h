@@ -25,12 +25,22 @@ struct hasp_func_item {
     }
 };
 
+struct shader_rt_item {
+    // TODO
+};
+
+struct mem_rt_item {
+    // TODO
+};
+
 class hasp_trigger
 {
 private:
     // backward pointer
     class gpgpu_context *gpgpu_ctx;
     mutable std::vector<hasp_func_item> hasp_func_table;
+    mutable std::vector<shader_rt_item> shader_table;
+    mutable std::vector<mem_rt_item>    mem_part_table;
 
 public:
     // C/D-Function
