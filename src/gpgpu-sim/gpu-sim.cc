@@ -739,20 +739,24 @@ void gpgpu_sim::decrement_kernel_latency() {
   }
 }
 
-kernel_info_t *gpgpu_sim::select_kernel() {
+kernel_info_t *gpgpu_sim::select_kernel(int shader_id) {
   if (m_running_kernels[m_last_issued_kernel] &&
       !m_running_kernels[m_last_issued_kernel]->no_more_ctas_to_run() &&
       !m_running_kernels[m_last_issued_kernel]->m_kernel_TB_latency) {
-    unsigned launch_uid = m_running_kernels[m_last_issued_kernel]->get_uid();
-    if (std::find(m_executed_kernel_uids.begin(), m_executed_kernel_uids.end(),
-                  launch_uid) == m_executed_kernel_uids.end()) {
-      m_running_kernels[m_last_issued_kernel]->start_cycle =
-          gpu_sim_cycle + gpu_tot_sim_cycle;
-      m_executed_kernel_uids.push_back(launch_uid);
-      m_executed_kernel_names.push_back(
-          m_running_kernels[m_last_issued_kernel]->name());
+    if (m_config.m_hasp_trigger.register_shader_table(m_running_kernels[m_last_issued_kernel]->name().c_str(), shader_id)) {
+      unsigned launch_uid = m_running_kernels[m_last_issued_kernel]->get_uid();
+      if (std::find(m_executed_kernel_uids.begin(), m_executed_kernel_uids.end(),
+                    launch_uid) == m_executed_kernel_uids.end()) {
+        m_running_kernels[m_last_issued_kernel]->start_cycle =
+            gpu_sim_cycle + gpu_tot_sim_cycle;
+        m_executed_kernel_uids.push_back(launch_uid);
+        m_executed_kernel_names.push_back(
+            m_running_kernels[m_last_issued_kernel]->name());
+      }
+      return m_running_kernels[m_last_issued_kernel];
+    } else {
+      return NULL;
     }
-    return m_running_kernels[m_last_issued_kernel];
   }
 
   for (unsigned n = 0; n < m_running_kernels.size(); n++) {
@@ -760,18 +764,20 @@ kernel_info_t *gpgpu_sim::select_kernel() {
         (n + m_last_issued_kernel + 1) % m_config.max_concurrent_kernel;
     if (kernel_more_cta_left(m_running_kernels[idx]) &&
         !m_running_kernels[idx]->m_kernel_TB_latency) {
-      m_last_issued_kernel = idx;
-      m_running_kernels[idx]->start_cycle = gpu_sim_cycle + gpu_tot_sim_cycle;
-      // record this kernel for stat print if it is the first time this kernel
-      // is selected for execution
-      unsigned launch_uid = m_running_kernels[idx]->get_uid();
-      assert(std::find(m_executed_kernel_uids.begin(),
-                       m_executed_kernel_uids.end(),
-                       launch_uid) == m_executed_kernel_uids.end());
-      m_executed_kernel_uids.push_back(launch_uid);
-      m_executed_kernel_names.push_back(m_running_kernels[idx]->name());
+      if (m_config.m_hasp_trigger.register_shader_table(m_running_kernels[idx]->name().c_str(), shader_id)) {
+        m_last_issued_kernel = idx;
+        m_running_kernels[idx]->start_cycle = gpu_sim_cycle + gpu_tot_sim_cycle;
+        // record this kernel for stat print if it is the first time this kernel
+        // is selected for execution
+        unsigned launch_uid = m_running_kernels[idx]->get_uid();
+        assert(std::find(m_executed_kernel_uids.begin(),
+                        m_executed_kernel_uids.end(),
+                        launch_uid) == m_executed_kernel_uids.end());
+        m_executed_kernel_uids.push_back(launch_uid);
+        m_executed_kernel_names.push_back(m_running_kernels[idx]->name());
 
-      return m_running_kernels[idx];
+        return m_running_kernels[idx];
+      }
     }
   }
   return NULL;

@@ -4199,7 +4199,7 @@ unsigned simt_core_cluster::issue_block2core() {
     // Jin: fetch kernel according to concurrent kernel setting
     if (m_config->gpgpu_concurrent_kernel_sm) {  // concurrent kernel on sm
       // always select latest issued kernel
-      kernel_info_t *k = m_gpu->select_kernel();
+      kernel_info_t *k = m_gpu->select_kernel(m_cluster_id);
       kernel = k;
     } else {
       // first select core kernel, if no more cta, get a new kernel
@@ -4208,7 +4208,7 @@ unsigned simt_core_cluster::issue_block2core() {
       if (!m_gpu->kernel_more_cta_left(kernel)) {
         // wait till current kernel finishes
         if (m_core[core]->get_not_completed() == 0) {
-          kernel_info_t *k = m_gpu->select_kernel();
+          kernel_info_t *k = m_gpu->select_kernel(m_cluster_id);
           if (k) {
             get_gpu()->get_config().clear_hasp_stream(k->name().c_str());
             m_core[core]->set_kernel(k);

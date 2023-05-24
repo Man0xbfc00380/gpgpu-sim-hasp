@@ -80,4 +80,5 @@ class gpgpu_context {
 };
 gpgpu_context *GPGPU_Context();
 void haspFunctionRegister(const void* func_ptr, char* func_name, CUctx_st *context);
+void haspStreamFuncMap(const void* func_ptr, int stream_id);
 #endif /* __gpgpu_context_h__ */

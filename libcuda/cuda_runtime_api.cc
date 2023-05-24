@@ -766,6 +766,14 @@ void haspFunctionRegister(const void* func_ptr, char* func_name, CUctx_st *conte
   int add_token = config.add_hasp_trigger_item(func_ptr, func_name);
 }
 
+void haspStreamFuncMap(const void* func_ptr, int stream_id, CUctx_st *context) {
+  printf("[haspStreamFuncMap] %p-%d\n", func_ptr, stream_id); 
+  _cuda_device_id *dev = context->get_device();
+  const struct cudaDeviceProp *prop = dev->get_prop();
+  const gpgpu_sim_config &config = dev->get_gpgpu()->get_config();
+  config.push_hasp_func_stream(func_ptr, stream_id);
+}
+
 void cudaRegisterFunctionInternal(void **fatCubinHandle, const char *hostFun,
                                   char *deviceFun, const char *deviceName,
                                   int thread_limit, uint3 *tid, uint3 *bid,
@@ -964,12 +972,13 @@ cudaError_t cudaLaunchInternal(const char *hostFun,
     }
   }
   struct CUstream_st *stream = config.get_stream();
-
+  
   printf("\nGPGPU-Sim PTX: cudaLaunch for 0x%p (mode=%s) on stream %u\n",
          hostFun,
          (ctx->func_sim->g_ptx_sim_mode) ? "functional simulation"
                                          : "performance simulation",
          stream ? stream->get_uid() : 0);
+  haspStreamFuncMap(hostFun, stream ? stream->get_uid() : 0, context);
   kernel_info_t *grid = ctx->api->gpgpu_cuda_ptx_sim_init_grid(
       hostFun, config.get_args(), config.grid_dim(), config.block_dim(),
       context);

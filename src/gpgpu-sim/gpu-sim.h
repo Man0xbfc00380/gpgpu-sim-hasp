@@ -386,6 +386,10 @@ class gpgpu_sim_config : public power_config,
     m_hasp_trigger.clear_shader_table(func_name);
   }
 
+  void push_hasp_func_stream(const void* func_ptr, int stream_id) const {
+    m_hasp_trigger.push_back_hasp_func_stream(func_ptr, stream_id);
+  }
+
  private:
   void init_clock_domains(void);
 
@@ -543,7 +547,7 @@ class gpgpu_sim : public gpgpu_t {
   bool get_more_cta_left() const;
   bool kernel_more_cta_left(kernel_info_t *kernel) const;
   bool hit_max_cta_count() const;
-  kernel_info_t *select_kernel();
+  kernel_info_t *select_kernel(int shader_id);
   void decrement_kernel_latency();
 
   const gpgpu_sim_config &get_config() const { return m_config; }

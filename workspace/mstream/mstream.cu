@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <cuda_runtime.h>
 
-__global__  void  haspSet_vectorAddKernel_th1_sh5_mem4(){}
-__global__  void  haspSet_vectorMulKernel_th2_sh25_mem20(){}
+__global__  void  haspSet_th1_sh5_mem4(){}
+__global__  void  haspSet_th2_sh24_mem20(){}
 __global__  void  haspUnset_th1(){}
 __global__  void  haspUnset_th2(){}
 
@@ -49,8 +49,8 @@ int main()
     cudaStreamCreate(&stream1);
     cudaStreamCreate(&stream2);
 
-    haspSet_vectorAddKernel_th1_sh5_mem4<<<1, 1, 0, stream1>>> ();
-    haspSet_vectorMulKernel_th2_sh25_mem20<<<1, 1, 0, stream2>>> ();
+    haspSet_th1_sh5_mem4<<<1, 1, 0, stream1>>> ();
+    haspSet_th2_sh25_mem20<<<1, 1, 0, stream2>>> ();
 
     vectorAddKernel<<<blocksPerGrid1, threadsPerBlock, 0, stream1>>>(d_a, d_b, d_c, N1);
     cudaMemcpyAsync(h_c, d_c, N * sizeof(int), cudaMemcpyDeviceToHost, stream1);
