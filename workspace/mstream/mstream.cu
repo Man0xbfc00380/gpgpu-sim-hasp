@@ -38,6 +38,8 @@ int main()
     cudaMalloc(&d_c, N * sizeof(int));
     cudaMalloc(&d_d, N * sizeof(int));
 
+    printf("cudaMalloc Addr: %p-%p-%p-%p\n", d_a, d_b, d_c, d_d);
+
     cudaMemcpy(d_a, h_a, N * sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_b, h_b, N * sizeof(int), cudaMemcpyHostToDevice);
     
@@ -50,7 +52,7 @@ int main()
     cudaStreamCreate(&stream2);
 
     haspSet_th1_sh5_mem4<<<1, 1, 0, stream1>>> ();
-    haspSet_th2_sh25_mem20<<<1, 1, 0, stream2>>> ();
+    haspSet_th2_sh24_mem20<<<1, 1, 0, stream2>>> ();
 
     vectorAddKernel<<<blocksPerGrid1, threadsPerBlock, 0, stream1>>>(d_a, d_b, d_c, N1);
     cudaMemcpyAsync(h_c, d_c, N * sizeof(int), cudaMemcpyDeviceToHost, stream1);

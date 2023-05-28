@@ -153,7 +153,7 @@ bool hasp_trigger::register_shader_table(const char * c_func_name, int shader_id
                     // Can allocate more shader
                     (*shader_table_ptr)[shader_id] = cur_stream_id;
                     printf("[Register Success] Allocate stream %d to shader %d\n", cur_stream_id, shader_id);
-                    print_stream_table();
+                    // print_stream_table();
                     return true;
                 } else {
                     return false;
@@ -161,7 +161,7 @@ bool hasp_trigger::register_shader_table(const char * c_func_name, int shader_id
             } else {
                 if ((*shader_table_ptr)[shader_id] == cur_stream_id) {
                     printf("[Register Success] Allocate stream %d to shader %d\n", cur_stream_id, shader_id);
-                    print_stream_table();
+                    // print_stream_table();
                     return true;
                 } else {
                     return false;
@@ -185,7 +185,7 @@ void hasp_trigger::clear_shader_table(const char * c_func_name) const {
                 for (int i = 0; i < shader_table_ptr->size(); i++) {
                     if ((*shader_table_ptr)[i] == item.stream_id) (*shader_table_ptr)[i] = -1;
                 }
-                print_stream_table();
+                // print_stream_table();
             }
         }
     }

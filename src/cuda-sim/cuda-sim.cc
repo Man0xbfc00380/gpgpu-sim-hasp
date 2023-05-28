@@ -474,6 +474,13 @@ void gpgpu_t::memcpy_to_gpu(size_t dst_start_addr, const void *src,
         count, (unsigned long long)src, (unsigned long long)dst_start_addr);
     fflush(stdout);
   }
+  
+  // Memory Copy
+  printf(
+        "GPGPU-Sim PTX: copying %zu bytes from CPU[0x%Lx] to GPU[0x%Lx] ... \n",
+        count, (unsigned long long)src, (unsigned long long)dst_start_addr
+  );
+  
   char *src_data = (char *)src;
   for (unsigned n = 0; n < count; n++)
     m_global_mem->write(dst_start_addr + n, 1, src_data + n, NULL, NULL);

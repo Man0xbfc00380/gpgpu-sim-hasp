@@ -65,7 +65,7 @@
 #define DUMPLOG 333
 
 // HASP Extension Enable (1: Enable, 0: Disable)
-#define HASP 1
+#define HASP_EN 1
 
 class gpgpu_context;
 

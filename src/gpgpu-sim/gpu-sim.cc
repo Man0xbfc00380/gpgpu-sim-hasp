@@ -743,7 +743,7 @@ kernel_info_t *gpgpu_sim::select_kernel(int shader_id) {
   if (m_running_kernels[m_last_issued_kernel] &&
       !m_running_kernels[m_last_issued_kernel]->no_more_ctas_to_run() &&
       !m_running_kernels[m_last_issued_kernel]->m_kernel_TB_latency) {
-    if (m_config.m_hasp_trigger.register_shader_table(m_running_kernels[m_last_issued_kernel]->name().c_str(), shader_id)) {
+    if (HASP_EN == 0 || m_config.m_hasp_trigger.register_shader_table(m_running_kernels[m_last_issued_kernel]->name().c_str(), shader_id)) {
       unsigned launch_uid = m_running_kernels[m_last_issued_kernel]->get_uid();
       if (std::find(m_executed_kernel_uids.begin(), m_executed_kernel_uids.end(),
                     launch_uid) == m_executed_kernel_uids.end()) {
@@ -764,7 +764,7 @@ kernel_info_t *gpgpu_sim::select_kernel(int shader_id) {
         (n + m_last_issued_kernel + 1) % m_config.max_concurrent_kernel;
     if (kernel_more_cta_left(m_running_kernels[idx]) &&
         !m_running_kernels[idx]->m_kernel_TB_latency) {
-      if (m_config.m_hasp_trigger.register_shader_table(m_running_kernels[idx]->name().c_str(), shader_id)) {
+      if (HASP_EN == 0 || m_config.m_hasp_trigger.register_shader_table(m_running_kernels[idx]->name().c_str(), shader_id)) {
         m_last_issued_kernel = idx;
         m_running_kernels[idx]->start_cycle = gpu_sim_cycle + gpu_tot_sim_cycle;
         // record this kernel for stat print if it is the first time this kernel
@@ -1762,7 +1762,6 @@ void gpgpu_sim::cycle() {
         unsigned response_size =
             mf->get_is_write() ? mf->get_ctrl_size() : mf->size();
         if (::icnt_has_buffer(m_shader_config->mem2device(i), response_size)) {
-          // if (!mf->get_is_write())
           mf->set_return_timestamp(gpu_sim_cycle + gpu_tot_sim_cycle);
           mf->set_status(IN_ICNT_TO_SHADER, gpu_sim_cycle + gpu_tot_sim_cycle);
           ::icnt_push(m_shader_config->mem2device(i), mf->get_tpc(), mf,
@@ -1854,8 +1853,6 @@ void gpgpu_sim::cycle() {
     }
     temp = temp / m_shader_config->num_shader();
     *average_pipeline_duty_cycle = ((*average_pipeline_duty_cycle) + temp);
-    // cout<<"Average pipeline duty cycle:
-    // "<<*average_pipeline_duty_cycle<<endl;
 
     if (g_single_step &&
         ((gpu_sim_cycle + gpu_tot_sim_cycle) >= g_single_step)) {
@@ -2003,6 +2000,9 @@ void gpgpu_sim::perf_memcpy_to_gpu(size_t dst_start_addr, size_t count) {
       const unsigned partition_id =
           raw_addr.sub_partition /
           m_memory_config->m_n_sub_partition_per_memory_channel;
+      // printf("[After Decoder] dst_start_addr = 0x%Lx --> sub_partition = %u = %u/%u\n", 
+            wr_addr, partition_id, raw_addr.sub_partition, 
+            m_memory_config->m_n_sub_partition_per_memory_channel);
       m_memory_partition_unit[partition_id]->handle_memcpy_to_gpu(
           wr_addr, raw_addr.sub_partition, mask);
     }
