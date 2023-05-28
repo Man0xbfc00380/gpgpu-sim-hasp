@@ -1986,23 +1986,20 @@ void shader_core_ctx::dump_warp_state(FILE *fout) const {
 
 void gpgpu_sim::perf_memcpy_to_gpu(size_t dst_start_addr, size_t count) {
   if (m_memory_config->m_perf_sim_memcpy) {
-    // if(!m_config.trace_driven_mode)    //in trace-driven mode, CUDA runtime
-    // can start nre data structure at any position 	assert (dst_start_addr %
-    // 32
-    //== 0);
-
     for (unsigned counter = 0; counter < count; counter += 32) {
       const unsigned wr_addr = dst_start_addr + counter;
       addrdec_t raw_addr;
       mem_access_sector_mask_t mask;
       mask.set(wr_addr % 128 / 32);
+      // wr_addr = ...xxxx 0[00]0 0000 -> one-hot into 4-bit
+      // [mask] 0001 -> 0010 -> 0100 -> 1000 -> 0001
       m_memory_config->m_address_mapping.addrdec_tlx(wr_addr, &raw_addr);
       const unsigned partition_id =
           raw_addr.sub_partition /
           m_memory_config->m_n_sub_partition_per_memory_channel;
       // printf("[After Decoder] dst_start_addr = 0x%Lx --> sub_partition = %u = %u/%u\n", 
-            wr_addr, partition_id, raw_addr.sub_partition, 
-            m_memory_config->m_n_sub_partition_per_memory_channel);
+      //       wr_addr, partition_id, raw_addr.sub_partition, 
+      //       m_memory_config->m_n_sub_partition_per_memory_channel);
       m_memory_partition_unit[partition_id]->handle_memcpy_to_gpu(
           wr_addr, raw_addr.sub_partition, mask);
     }
