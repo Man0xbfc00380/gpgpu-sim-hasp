@@ -31,6 +31,12 @@ struct addr2stream_item {
     int stream_id;
 };
 
+struct memory_item {
+    const void* addr;
+    size_t size;
+    int stream;
+};
+
 class hasp_trigger
 {
 private:
@@ -38,32 +44,42 @@ private:
     class gpgpu_context *gpgpu_ctx;
     mutable std::vector<hasp_func_item>         hasp_func_table;
     mutable std::vector<addr2stream_item>       addr2stream_table;
-    mutable std::map<const char*, const void*>   funxname2addr_map;
-
+    mutable std::vector<memory_item>            memory_map_table;
+    mutable std::map<const char*, const void*>  funxname2addr_map;
     mutable std::vector<int>                    *shader_table_ptr;
     mutable std::vector<int>                    *mem_part_table_ptr;
+    mutable int                                 cudaMalloc_target_stream;
+
 public:
     // C/D-Function
     hasp_trigger(gpgpu_context *ctx) {
         gpgpu_ctx = ctx;
+        cudaMalloc_target_stream = -1;
     }
     ~hasp_trigger();
+    
     // Methods
-    void print_table() const;
     void init(int n_shader, int n_mem_partition) const {
         shader_table_ptr = new std::vector<int>(n_shader, -1);
         mem_part_table_ptr = new std::vector<int>(n_mem_partition, -1);
     }
-    int add_hasp_item(const void* func_ptr, char* func_name) const;
-    bool register_shader_table(const char * c_func_name, int shader_id) const;
-    void clear_shader_table(const char * func_name) const;
+    
+    // Shader Allocation and Release
+    int add_trigger_item(const void* func_ptr, char* func_name) const;          // cudaFunc Declaration
+    void push_back_func_stream(const void* func_ptr, int stream_id) const;      // cudaFunc Launch
+    bool register_shader_table(const char * c_func_name, int shader_id) const;  // cudaFunc Execution
+    void clear_shader_table(const char * func_name) const;                      // cudaFunc Relase
+    
+    // Memory Allocation and Release
+    int add_memory_item(const void* addr, size_t size) const;                   // cudaFunc Launch
+    int get_partion_num_from_stream(int stream) const;                            // Address Decoder
+    int get_stream_from_mem_addr(long long addr) const;                         // Address Decoder
+
+    // Profile
     void print_stream_table() const;
-    void push_back_hasp_func_stream(const void* func_ptr, int stream_id) const {
-        addr2stream_item new_item;
-        new_item.addr = func_ptr;
-        new_item.stream_id = stream_id;
-        addr2stream_table.push_back(new_item);
-    }
+    void print_table() const;
+    void print_memory_table() const;
+    
 };
 
 #endif

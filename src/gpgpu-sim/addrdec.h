@@ -35,6 +35,7 @@
 #define ADDRDEC_H
 
 #include "../abstract_hardware_model.h"
+#include "hasp_trigger.h"
 
 enum partition_index_function {
   CONSECUTIVE = 0,
@@ -65,6 +66,7 @@ class linear_to_raw_address_translation {
 
   // accessors
   void addrdec_tlx(new_addr_type addr, addrdec_t *tlx) const;
+  void addrdec_tlx_hasp(new_addr_type addr, addrdec_t *tlx, const hasp_trigger* hasp_t) const;
   new_addr_type partition_address(new_addr_type addr) const;
 
  private:

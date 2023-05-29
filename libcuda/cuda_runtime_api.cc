@@ -504,7 +504,6 @@ cudaError_t cudaSetDeviceInternal(int device, gpgpu_context *gpgpu_ctx = NULL) {
   }
   // set the active device to run cuda
   if (device <= ctx->GPGPUSim_Init()->num_devices()) {
-    // printf("[run] cudaError_t cudaSetDeviceInternal(int device, gpgpu_context *gpgpu_ctx = NULL)\n");
     ctx->api->g_active_device = device;
     return g_last_cudaError = cudaSuccess;
   } else {
@@ -766,6 +765,15 @@ void haspFunctionRegister(const void* func_ptr, char* func_name, CUctx_st *conte
   int add_token = config.add_hasp_trigger_item(func_ptr, func_name);
 }
 
+void haspMemoryRegister(const void* addr, size_t size, CUctx_st *context) {
+  printf("[haspMemoryRegister] %p-%zu\n", addr, size); 
+  // Modify HASP Trigger Cconfiguaration
+  _cuda_device_id *dev = context->get_device();
+  const struct cudaDeviceProp *prop = dev->get_prop();
+  const gpgpu_sim_config &config = dev->get_gpgpu()->get_config();
+  config.add_hasp_memory_item(addr, size);
+}
+
 void haspStreamFuncMap(const void* func_ptr, int stream_id, CUctx_st *context) {
   printf("[haspStreamFuncMap] %p-%d\n", func_ptr, stream_id); 
   _cuda_device_id *dev = context->get_device();
@@ -973,7 +981,7 @@ cudaError_t cudaLaunchInternal(const char *hostFun,
   }
   struct CUstream_st *stream = config.get_stream();
   
-  printf("\nGPGPU-Sim PTX: cudaLaunch for 0x%p (mode=%s) on stream %u\n",
+  printf("\nGPGPU-Sim PTX: cudaLaunch for %p (mode=%s) on stream %u\n",
          hostFun,
          (ctx->func_sim->g_ptx_sim_mode) ? "functional simulation"
                                          : "performance simulation",
@@ -1059,6 +1067,7 @@ cudaError_t cudaMallocInternal(void **devPtr, size_t size,
            size, (unsigned long long)*devPtr);
     ctx->api->g_mallocPtr_Size[(unsigned long long)*devPtr] = size;
   }
+  haspMemoryRegister((const void*)(*devPtr), size, context);
   if (*devPtr) {
     return g_last_cudaError = cudaSuccess;
   } else {

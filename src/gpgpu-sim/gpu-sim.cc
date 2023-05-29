@@ -1991,15 +1991,12 @@ void gpgpu_sim::perf_memcpy_to_gpu(size_t dst_start_addr, size_t count) {
       addrdec_t raw_addr;
       mem_access_sector_mask_t mask;
       mask.set(wr_addr % 128 / 32);
-      // wr_addr = ...xxxx 0[00]0 0000 -> one-hot into 4-bit
-      // [mask] 0001 -> 0010 -> 0100 -> 1000 -> 0001
-      m_memory_config->m_address_mapping.addrdec_tlx(wr_addr, &raw_addr);
+      if (HASP_EN) m_memory_config->m_address_mapping.addrdec_tlx_hasp(wr_addr, &raw_addr, &m_config.m_hasp_trigger);
+      else m_memory_config->m_address_mapping.addrdec_tlx(wr_addr, &raw_addr);
+      // m_memory_config->m_address_mapping.addrdec_tlx(wr_addr, &raw_addr);
       const unsigned partition_id =
           raw_addr.sub_partition /
           m_memory_config->m_n_sub_partition_per_memory_channel;
-      // printf("[After Decoder] dst_start_addr = 0x%Lx --> sub_partition = %u = %u/%u\n", 
-      //       wr_addr, partition_id, raw_addr.sub_partition, 
-      //       m_memory_config->m_n_sub_partition_per_memory_channel);
       m_memory_partition_unit[partition_id]->handle_memcpy_to_gpu(
           wr_addr, raw_addr.sub_partition, mask);
     }

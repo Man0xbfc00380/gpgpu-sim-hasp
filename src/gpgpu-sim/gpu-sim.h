@@ -378,7 +378,7 @@ class gpgpu_sim_config : public power_config,
   
   // HASP Extension
   int add_hasp_trigger_item(const void* func_ptr, char* func_name) const {
-    return m_hasp_trigger.add_hasp_item(func_ptr, func_name);
+    return m_hasp_trigger.add_trigger_item(func_ptr, func_name);
   }
 
   void clear_hasp_stream(const char* func_name) const {
@@ -386,8 +386,15 @@ class gpgpu_sim_config : public power_config,
   }
 
   void push_hasp_func_stream(const void* func_ptr, int stream_id) const {
-    m_hasp_trigger.push_back_hasp_func_stream(func_ptr, stream_id);
+    m_hasp_trigger.push_back_func_stream(func_ptr, stream_id);
   }
+
+  void add_hasp_memory_item(const void* addr, size_t size) const {
+    m_hasp_trigger.add_memory_item(addr, size);
+  }
+
+  // Hongyi(2023): Added for HASP support
+  hasp_trigger m_hasp_trigger;
 
  private:
   void init_clock_domains(void);
@@ -397,8 +404,6 @@ class gpgpu_sim_config : public power_config,
   bool m_valid;
   shader_core_config m_shader_config;
   memory_config m_memory_config;
-  // Hongyi(2023): Added for HASP support
-  hasp_trigger m_hasp_trigger;
 
   // clock domains - frequency
   double core_freq;
