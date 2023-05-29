@@ -94,17 +94,17 @@ new_addr_type linear_to_raw_address_translation::partition_address(
 
 void linear_to_raw_address_translation::addrdec_tlx_hasp(new_addr_type addr,
                                                     addrdec_t *tlx, const hasp_trigger* hasp_t) const {
+  
   unsigned long long int addr_for_chip, rest_of_addr, rest_of_addr_high_bits;
   int stream_id = hasp_t->get_stream_from_mem_addr(addr);
-  int hasp_limited_partition_num = hasp_t->get_partion_num_from_stream(stream_id);
-  // Split the given address at ADDR_CHIP_S into (MSBs,LSBs)
-  // - extract chip address using modulus of MSBs
-  // - recreate the rest of the address by stitching the quotient of MSBs and the LSBs
-  int hasp_n_channel = hasp_limited_partition_num / m_n_sub_partition_in_channel;
-  addr_for_chip = (addr >> ADDR_CHIP_S) % hasp_n_channel;
+  int hasp_n_channel = hasp_t->get_partion_num_from_stream(stream_id);
+  int hasp_channel_offset = hasp_t->get_chip_offset_from_stream(stream_id);
+
+  addr_for_chip = (addr >> ADDR_CHIP_S) % hasp_n_channel + hasp_channel_offset;
   rest_of_addr = addr >> ADDR_CHIP_S;
   rest_of_addr = rest_of_addr / hasp_n_channel;
   rest_of_addr = rest_of_addr << ADDR_CHIP_S;
+  // printf("addr: %016llx ", addr);
 
   rest_of_addr_high_bits = ((addr >> ADDR_CHIP_S) / hasp_n_channel);
   rest_of_addr |= addr & ((1 << ADDR_CHIP_S) - 1);
@@ -112,7 +112,7 @@ void linear_to_raw_address_translation::addrdec_tlx_hasp(new_addr_type addr,
   tlx->chip = addr_for_chip;
   tlx->bk = addrdec_packbits(addrdec_mask[BK], rest_of_addr,
                                 addrdec_mkhigh[BK], addrdec_mklow[BK]);
-  // printf("bk: %d ", tlx->bk);
+  // printf("chip: %d bk: %d ", tlx->chip, tlx->bk);
   tlx->row = addrdec_packbits(addrdec_mask[ROW], rest_of_addr,
                                 addrdec_mkhigh[ROW], addrdec_mklow[ROW]);
   // printf("row: %d ", tlx->row);
@@ -122,23 +122,6 @@ void linear_to_raw_address_translation::addrdec_tlx_hasp(new_addr_type addr,
   tlx->burst = addrdec_packbits(addrdec_mask[BURST], rest_of_addr,
                                 addrdec_mkhigh[BURST], addrdec_mklow[BURST]);
   // printf("burst: %d ", tlx->burst);
-
-
-  // [repeat for debug]
-  // addr_for_chip = (addr >> ADDR_CHIP_S) % m_n_channel;
-  // rest_of_addr = ((addr >> ADDR_CHIP_S) / m_n_channel) << ADDR_CHIP_S;
-  // rest_of_addr_high_bits = ((addr >> ADDR_CHIP_S) / m_n_channel);
-  // rest_of_addr |= addr & ((1 << ADDR_CHIP_S) - 1);
-
-  // tlx->chip = addr_for_chip;
-  // tlx->bk = addrdec_packbits(addrdec_mask[BK], rest_of_addr,
-  //                               addrdec_mkhigh[BK], addrdec_mklow[BK]);
-  // tlx->row = addrdec_packbits(addrdec_mask[ROW], rest_of_addr,
-  //                               addrdec_mkhigh[ROW], addrdec_mklow[ROW]);
-  // tlx->col = addrdec_packbits(addrdec_mask[COL], rest_of_addr,
-  //                               addrdec_mkhigh[COL], addrdec_mklow[COL]);
-  // tlx->burst = addrdec_packbits(addrdec_mask[BURST], rest_of_addr,
-  //                               addrdec_mkhigh[BURST], addrdec_mklow[BURST]);
 
   switch (memory_partition_indexing) {
     case CONSECUTIVE:
@@ -208,8 +191,8 @@ void linear_to_raw_address_translation::addrdec_tlx_hasp(new_addr_type addr,
   unsigned sub_partition_addr_mask = m_n_sub_partition_in_channel - 1;
   tlx->sub_partition = tlx->chip * m_n_sub_partition_in_channel +
                        (tlx->bk & sub_partition_addr_mask);
-  // printf("sub_partition: %d ", tlx->sub_partition);
-  // printf("\n");
+  printf("sub_partition: %d ", tlx->sub_partition);
+  printf("\n");
 }
 
 void linear_to_raw_address_translation::addrdec_tlx(new_addr_type addr,

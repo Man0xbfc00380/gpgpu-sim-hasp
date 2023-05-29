@@ -72,7 +72,8 @@ public:
     
     // Memory Allocation and Release
     int add_memory_item(const void* addr, size_t size) const;                   // cudaFunc Launch
-    int get_partion_num_from_stream(int stream) const;                            // Address Decoder
+    int get_partion_num_from_stream(int stream) const;                          // Address Decoder
+    int get_chip_offset_from_stream(int stream) const;                          // Address Decoder
     int get_stream_from_mem_addr(long long addr) const;                         // Address Decoder
 
     // Profile

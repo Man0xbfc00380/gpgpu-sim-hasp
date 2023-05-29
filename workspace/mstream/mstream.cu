@@ -2,8 +2,8 @@
 #include <cuda_runtime.h>
 
 // User-Level Specific Function Interface
-__global__  void  haspSet_th1_sh5_mem4(){}
-__global__  void  haspSet_th2_sh24_mem20(){}
+__global__  void  haspSet_th1_sh5_mem2(){}
+__global__  void  haspSet_th2_sh24_mem10(){}
 __global__  void  haspMalloc_th1(){}
 __global__  void  haspMalloc_th2(){}
 __global__  void  haspUnset_th1(){}
@@ -43,8 +43,8 @@ int main()
     cudaStreamCreate(&stream1);
     cudaStreamCreate(&stream2);
 
-    haspSet_th1_sh5_mem4<<<1, 1, 0, stream1>>> ();
-    haspSet_th2_sh24_mem20<<<1, 1, 0, stream2>>> ();
+    haspSet_th1_sh5_mem2<<<1, 1, 0, stream1>>> ();
+    haspSet_th2_sh24_mem10<<<1, 1, 0, stream2>>> ();
 
     haspMalloc_th1<<<1, 1, 0, stream1>>>(); cudaMalloc(&d_a1, N1 * sizeof(int));
     haspMalloc_th1<<<1, 1, 0, stream1>>>(); cudaMalloc(&d_b1, N1 * sizeof(int));

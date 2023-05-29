@@ -258,4 +258,13 @@ int hasp_trigger::get_partion_num_from_stream(int stream) const {
     return -1;
 }
 
+int hasp_trigger::get_chip_offset_from_stream(int stream) const {
+    int offset = 0;
+    for (auto item : hasp_func_table) {
+        if (item.stream_id < stream && item.nmemory_partition_num > 0) 
+            offset += item.nmemory_partition_num;
+    }
+    return offset;
+}
+
 hasp_trigger::~hasp_trigger(){}
