@@ -191,8 +191,8 @@ void linear_to_raw_address_translation::addrdec_tlx_hasp(new_addr_type addr,
   unsigned sub_partition_addr_mask = m_n_sub_partition_in_channel - 1;
   tlx->sub_partition = tlx->chip * m_n_sub_partition_in_channel +
                        (tlx->bk & sub_partition_addr_mask);
-  printf("sub_partition: %d ", tlx->sub_partition);
-  printf("\n");
+  // printf("sub_partition: %d ", tlx->sub_partition);
+  // printf("\n");
 }
 
 void linear_to_raw_address_translation::addrdec_tlx(new_addr_type addr,

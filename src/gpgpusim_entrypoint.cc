@@ -58,7 +58,7 @@ void *gpgpu_sim_thread_sequential(void *ctx_ptr) {
         ctx->the_gpgpusim->g_the_gpu->cycle();
         ctx->the_gpgpusim->g_the_gpu->deadlock_check();
       }
-      // ctx->the_gpgpusim->g_the_gpu->print_stats();
+      ctx->the_gpgpusim->g_the_gpu->print_stats();
       ctx->the_gpgpusim->g_the_gpu->update_stats();
       ctx->print_simulation_time();
     }

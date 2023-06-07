@@ -241,7 +241,7 @@ stream_manager::stream_manager(gpgpu_sim *gpu, bool cuda_launch_blocking) {
 bool stream_manager::operation(bool *sim) {
   bool check = check_finished_kernel();
   pthread_mutex_lock(&m_lock);
-  //    if(check)m_gpu->print_stats();
+     if(check)m_gpu->print_stats();
   stream_operation op = front();
   if (!op.do_operation(m_gpu))  // not ready to execute
   {
